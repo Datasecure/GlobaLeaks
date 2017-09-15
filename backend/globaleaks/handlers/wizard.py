@@ -20,7 +20,7 @@ def wizard(store, request, language):
     tenant = models.db_get(store, models.Tenant, id=1)
     tenant.label = request['node']['name']
 
-    node = config.NodeFactory(store)
+    node = config.NodeFactory(store, 1)
 
     if node.get_val(u'wizard_done'):
         log.err("DANGER: Wizard already initialized!")
@@ -32,12 +32,12 @@ def wizard(store, request, language):
     node.set_val(u'default_language', language)
     node.set_val(u'wizard_done', True)
 
-    node_l10n = l10n.NodeL10NFactory(store)
+    node_l10n = l10n.NodeL10NFactory(store, 1)
 
     node_l10n.set_val(u'description', language, request['node']['description'])
     node_l10n.set_val(u'header_title_homepage', language, request['node']['name'])
 
-    models.profiles.load_profile(store, request['profile'])
+    profiles.load_profile(store, 1, request['profile'])
 
     context = db_create_context(store, request['context'], language)
 

@@ -34,6 +34,8 @@ from globaleaks.models.config import PrivateFactory
 from globaleaks.settings import Settings
 from globaleaks.utils.utility import log
 
+XTIDX = 1
+
 migration_mapping = OrderedDict([
     ('Anomalies', [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, models.Anomalies, 0, 0, 0, 0, 0, 0, 0, 0]),
     ('ArchivedSchema', [-1, -1, -1, ArchivedSchema_v_23, models.ArchivedSchema, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
@@ -75,26 +77,27 @@ migration_mapping = OrderedDict([
 ])
 
 def db_perform_data_update(store):
-    prv = PrivateFactory(store)
+    for tid in store.find(models.Tenant.id):
+        prv = PrivateFactory(store, tid)
 
-    stored_ver = prv.get_val(u'version')
-    t = (stored_ver, __version__)
+        stored_ver = prv.get_val(u'version')
+        t = (stored_ver, __version__)
 
-    if stored_ver != __version__:
-        prv.set_val(u'version', __version__)
+        if stored_ver != __version__:
+            prv.set_val(u'version', __version__)
 
-        # The below commands can change the current store based on the what is
-        # currently stored in the DB.
-        appdata = load_appdata()
-        db_update_defaults(store)
-        l10n.update_defaults(store, appdata)
-        config.update_defaults(store)
-        db_fix_fields_attrs(store)
+            # The below commands can change the current store based on the what is
+            # currently stored in the DB.
+            appdata = load_appdata()
+            db_update_defaults(store, tid)
+            l10n.update_defaults(store, tid, appdata)
+            config.update_defaults(store, tid)
+            db_fix_fields_attrs(store, tid)
 
-    ok = config.is_cfg_valid(store)
-    if not ok:
-        m = 'Error: the system is not stable, update failed from %s to %s' % t
-        raise Exception(m)
+        ok = config.is_cfg_valid(store, tid)
+        if not ok:
+            m = 'Error: the system is not stable, update failed from %s to %s' % t
+            raise Exception(m)
 
 
 def perform_data_update(dbfile):

@@ -163,7 +163,7 @@ class TestConfigUpdates(unittest.TestCase):
 
     def test_migration_error_with_removed_language(self):
         store = Store(create_database(Settings.db_uri))
-        zyx = EnabledLanguage('zyx')
+        zyx = EnabledLanguage(1, 'zyx')
         store.add(zyx)
         store.commit()
         store.close()
