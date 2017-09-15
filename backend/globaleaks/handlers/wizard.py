@@ -6,7 +6,11 @@ from globaleaks.db import db_refresh_memory_variables
 from globaleaks.handlers.admin.context import db_create_context
 from globaleaks.handlers.admin.user import db_create_admin_user, db_create_receiver_user
 from globaleaks.handlers.base import BaseHandler
+<<<<<<< 043c15f9c892a98030467b34345876c7dcd021b3
 from globaleaks.models import config, l10n, profiles
+=======
+from globaleaks.handlers.public import serialize_node
+>>>>>>> Apply minor code rewrites anticipating code needed in multitenancy implementation
 from globaleaks.orm import transact
 from globaleaks.rest import requests, errors
 from globaleaks.utils.utility import log, datetime_null
@@ -33,7 +37,7 @@ def wizard(store, request, language):
     node_l10n.set_val(u'description', language, request['node']['description'])
     node_l10n.set_val(u'header_title_homepage', language, request['node']['name'])
 
-    profiles.load_profile(store, request['profile'])
+    models.profiles.load_profile(store, request['profile'])
 
     context = db_create_context(store, request['context'], language)
 
