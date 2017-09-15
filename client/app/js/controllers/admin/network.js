@@ -182,8 +182,7 @@ controller('AdminHTTPSConfigCtrl', ['$q', '$location', '$http', '$scope', '$uibM
   };
 
   $scope.toggleCfg = function() {
-    // A promise which resolves only after a modal has been displayed
-    var modal_open = $q.defer();
+    var open_promise = $q.defer();
 
     if ($scope.tls_config.enabled) {
       if ($location.protocol() === 'https') {
@@ -195,15 +194,15 @@ controller('AdminHTTPSConfigCtrl', ['$q', '$location', '$http', '$scope', '$uibM
           templateUrl: 'views/partials/disable_input.html',
           controller: 'disableInputModalCtrl',
           resolve: {
-            modal_open: function() { return modal_open; },
+            open_promise: function() { return open_promise; },
           },
         });
 
         modal_open.promise.then($scope.tls_config.$disable);
       } else {
         // Just disable https and refresh the interface
-        modal_open.promise.then($scope.tls_config.$disable).then(refreshConfig);
-        modal_open.resolve();
+        open_promise.promise.then($scope.tls_config.$disable).then(refreshConfig);
+        open_promise.resolve();
       }
     } else {
       var go_url = 'https://' + $scope.admin.node.hostname + '/#/admin/network';
@@ -215,7 +214,7 @@ controller('AdminHTTPSConfigCtrl', ['$q', '$location', '$http', '$scope', '$uibM
         controller: 'safeRedirectModalCtrl',
         resolve: {
           https_url: function() { return go_url; },
-          modal_open: function() { return modal_open; },
+          open_promise: function() { return open_promise; },
         },
       });
 
@@ -250,10 +249,10 @@ controller('AdminHTTPSConfigCtrl', ['$q', '$location', '$http', '$scope', '$uibM
   }
 }])
 .controller('disableInputModalCtrl', ['$scope', function($scope) {
-  $scope.$resolve.modal_open.resolve();
+  $scope.$resolve.open_promise.resolve();
 }])
-.controller('safeRedirectModalCtrl', ['$scope', '$timeout', '$route', function($scope, $timeout, $route) {
-  $scope.$resolve.modal_open.resolve();
+.controller('safeRedirectModalCtrl', ['$scope', '$timeout', '$reload', function($scope, $timeout, $reload) {
+  $scope.$resolve.open_promise.resolve();
   $timeout(function() {
     $route.reload();
   }, 15000);
